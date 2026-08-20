@@ -12,22 +12,39 @@
   <meta property="og:description" content="Professional printing and visual production.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://1plus.uz/">
-  <meta property="og:image" content="https://1plus.uz/assets/bir-plus-logo.jpg">
+  <meta property="og:image" content="https://1plus.uz/assets/og-cover.png">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="BIR+ — Har kuni 1% yaxshiroq.">
   <meta name="twitter:description" content="Professional printing and visual production.">
-  <meta name="twitter:image" content="https://1plus.uz/assets/bir-plus-logo.jpg">
+  <meta name="twitter:image" content="https://1plus.uz/assets/og-cover.png">
 
   <link rel="icon" type="image/jpeg" href="assets/bir-plus-logo.jpg">
   <link rel="apple-touch-icon" href="assets/bir-plus-logo.jpg">
 
+  <!-- Set theme + js class before paint to avoid FOUC/flash -->
+  <script>
+    (function () {
+      var d = document.documentElement;
+      d.classList.add("js");
+      try {
+        var saved = localStorage.getItem("bir-theme");
+        var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        d.setAttribute("data-theme", saved || (prefersDark ? "dark" : "light"));
+      } catch (e) {
+        d.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <a class="skip-link" href="#main">Asosiy kontentga o‘tish</a>
+  <div class="bg-mesh" aria-hidden="true"></div>
+  <canvas class="bg-canvas" id="fluidCanvas" aria-hidden="true"></canvas>
   <div class="page-noise" aria-hidden="true"></div>
 
   <header class="site-header" id="top">
@@ -45,7 +62,11 @@
       </nav>
 
       <div class="nav-actions">
-        <button class="sound-btn" id="soundToggle" type="button" aria-pressed="false" title="Interfeys tovushlari">
+        <button class="icon-btn theme-btn" id="themeToggle" type="button" aria-label="Mavzuni almashtirish (och / to‘q)" title="Mavzu: och / to‘q">
+          <svg class="ico ico-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <svg class="ico ico-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/></svg>
+        </button>
+        <button class="icon-btn sound-btn" id="soundToggle" type="button" aria-pressed="false" title="Interfeys tovushlari">
           <span class="sound-dot"></span>
           <span class="sound-label">Sound</span>
         </button>
