@@ -6,9 +6,20 @@
   <title>BIR+ — Har kuni 1% yaxshiroq.</title>
   <meta name="description" content="BIR+ — professional printing va visual production. Vizitka, banner, poster, stiker, foto print, kitob print va boshqa xizmatlar.">
   <meta name="theme-color" content="#050505">
+  <link rel="canonical" href="https://1plus.uz/">
+
   <meta property="og:title" content="BIR+ — Har kuni 1% yaxshiroq.">
   <meta property="og:description" content="Professional printing and visual production.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://1plus.uz/">
+  <meta property="og:image" content="https://1plus.uz/assets/bir-plus-logo.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="BIR+ — Har kuni 1% yaxshiroq.">
+  <meta name="twitter:description" content="Professional printing and visual production.">
+  <meta name="twitter:image" content="https://1plus.uz/assets/bir-plus-logo.jpg">
+
+  <link rel="icon" type="image/jpeg" href="assets/bir-plus-logo.jpg">
+  <link rel="apple-touch-icon" href="assets/bir-plus-logo.jpg">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,12 +27,13 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <a class="skip-link" href="#main">Asosiy kontentga o‘tish</a>
   <div class="page-noise" aria-hidden="true"></div>
 
   <header class="site-header" id="top">
     <div class="container nav">
       <a class="brand" href="#top" aria-label="BIR+ bosh sahifa">
-        <img src="assets/bir-plus-logo.jpg" alt="BIR+ logotipi">
+        <img src="assets/bir-plus-logo.jpg" alt="BIR+ logotipi" width="94" height="52" fetchpriority="high">
       </a>
 
       <nav class="desktop-nav" aria-label="Asosiy navigatsiya">
@@ -54,7 +66,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="main">
     <section class="hero section">
       <div class="hero-grid container">
         <div class="hero-copy reveal">
@@ -84,7 +96,7 @@
               <span>01 / 01</span>
             </div>
             <div class="visual-logo-wrap">
-              <img src="assets/bir-plus-logo.jpg" alt="BIR+ brend logotipi">
+              <img src="assets/bir-plus-logo.jpg" alt="BIR+ brend logotipi" width="444" height="444" loading="lazy">
             </div>
             <div class="visual-bottom">
               <span>VISUAL PRODUCTION</span>
@@ -153,11 +165,11 @@
             <p class="eyebrow"><span></span> PORTFOLIO</p>
             <h2>So‘nggi <em>ishlar.</em></h2>
           </div>
-          <div class="filters" role="tablist" aria-label="Portfolio filtri">
-            <button class="filter active" data-filter="all">Barchasi</button>
-            <button class="filter" data-filter="business">Biznes</button>
-            <button class="filter" data-filter="promo">Promo</button>
-            <button class="filter" data-filter="print">Print</button>
+          <div class="filters" role="group" aria-label="Portfolio filtri">
+            <button type="button" class="filter active" data-filter="all" aria-pressed="true">Barchasi</button>
+            <button type="button" class="filter" data-filter="business" aria-pressed="false">Biznes</button>
+            <button type="button" class="filter" data-filter="promo" aria-pressed="false">Promo</button>
+            <button type="button" class="filter" data-filter="print" aria-pressed="false">Print</button>
           </div>
         </div>
 
