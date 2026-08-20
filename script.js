@@ -14,7 +14,8 @@ const services = [
 ];
 
 const servicesGrid = $("#servicesGrid");
-servicesGrid.innerHTML = services.map(([num,title,desc,icon]) => `
+if (servicesGrid) {
+  servicesGrid.innerHTML = services.map(([num,title,desc,icon]) => `
   <article class="service-card reveal" data-sound="soft">
     <span class="service-number">${num}</span>
     <span class="service-icon" aria-hidden="true">${icon}</span>
@@ -23,20 +24,39 @@ servicesGrid.innerHTML = services.map(([num,title,desc,icon]) => `
     <a class="service-link" href="#order">Buyurtma →</a>
   </article>
 `).join("");
+}
 
 /* ---------- Mobile navigation ---------- */
 const menuToggle = $("#menuToggle");
 const mobileMenu = $("#mobileMenu");
 
-menuToggle.addEventListener("click", () => {
-  const open = mobileMenu.classList.toggle("open");
-  menuToggle.setAttribute("aria-expanded", String(open));
-  playUiSound("soft");
-});
-$$(".mobile-menu a").forEach(link => link.addEventListener("click", () => {
+function closeMenu() {
+  if (!mobileMenu || !mobileMenu.classList.contains("open")) return;
   mobileMenu.classList.remove("open");
   menuToggle.setAttribute("aria-expanded", "false");
-}));
+}
+
+if (menuToggle && mobileMenu) {
+  menuToggle.addEventListener("click", () => {
+    const open = mobileMenu.classList.toggle("open");
+    menuToggle.setAttribute("aria-expanded", String(open));
+    playUiSound("soft");
+  });
+
+  $$(".mobile-menu a").forEach(link => link.addEventListener("click", closeMenu));
+
+  // Close on Escape and when clicking outside the header
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeMenu();
+  });
+  document.addEventListener("click", e => {
+    if (mobileMenu.classList.contains("open") &&
+        !mobileMenu.contains(e.target) &&
+        !menuToggle.contains(e.target)) {
+      closeMenu();
+    }
+  });
+}
 
 /* ---------- Lightweight UI sound system ----------
    Web Audio API is used so the prototype has no audio dependency.
@@ -78,15 +98,17 @@ function playUiSound(type = "soft") {
 }
 
 const soundToggle = $("#soundToggle");
-soundToggle.addEventListener("click", () => {
-  soundEnabled = !soundEnabled;
-  soundToggle.classList.toggle("active", soundEnabled);
-  soundToggle.setAttribute("aria-pressed", String(soundEnabled));
-  if (soundEnabled) {
-    ensureAudio();
-    playUiSound("click");
-  }
-});
+if (soundToggle) {
+  soundToggle.addEventListener("click", () => {
+    soundEnabled = !soundEnabled;
+    soundToggle.classList.toggle("active", soundEnabled);
+    soundToggle.setAttribute("aria-pressed", String(soundEnabled));
+    if (soundEnabled) {
+      ensureAudio();
+      playUiSound("click");
+    }
+  });
+}
 
 document.addEventListener("click", e => {
   const target = e.target.closest("[data-sound]");
@@ -96,8 +118,12 @@ document.addEventListener("click", e => {
 /* ---------- Portfolio filter ---------- */
 $$(".filter").forEach(button => {
   button.addEventListener("click", () => {
-    $$(".filter").forEach(b => b.classList.remove("active"));
+    $$(".filter").forEach(b => {
+      b.classList.remove("active");
+      b.setAttribute("aria-pressed", "false");
+    });
     button.classList.add("active");
+    button.setAttribute("aria-pressed", "true");
 
     const filter = button.dataset.filter;
     $$(".portfolio-card").forEach(card => {
@@ -116,23 +142,48 @@ const revealObserver = new IntersectionObserver(entries => {
       revealObserver.unobserve(entry.target);
     }
   });
-}, { threshold: 0.08 });
+}, { threshold: 0.08, rootMargin: "0px 0px -40px 0px" });
 
-$$(".reveal").forEach(el => revealObserver.observe(el));
+// Stagger reveals for siblings sharing a parent for a smoother cascade.
+const revealGroups = new Map();
+$$(".reveal").forEach(el => {
+  const parent = el.parentElement;
+  const index = revealGroups.get(parent) || 0;
+  revealGroups.set(parent, index + 1);
+  el.style.setProperty("--reveal-delay", `${Math.min(index, 6) * 70}ms`);
+  revealObserver.observe(el);
+});
 
 /* ---------- Hero tilt: intentionally lightweight and future-3D friendly ---------- */
 const tiltTarget = $("[data-tilt]");
 const visualCard = $(".visual-card");
+const canTilt = tiltTarget && visualCard &&
+  window.matchMedia("(pointer: fine)").matches &&
+  !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-if (tiltTarget && visualCard && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  tiltTarget.addEventListener("pointermove", e => {
-    const rect = tiltTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
+if (canTilt) {
+  let rafId = null;
+  let pending = null;
+
+  const applyTilt = () => {
+    rafId = null;
+    if (!pending) return;
+    const { x, y } = pending;
     visualCard.style.transform =
       `rotateX(${(-y * 7).toFixed(2)}deg) rotateY(${(x * 9).toFixed(2)}deg) translateZ(0)`;
+  };
+
+  tiltTarget.addEventListener("pointermove", e => {
+    const rect = tiltTarget.getBoundingClientRect();
+    pending = {
+      x: (e.clientX - rect.left) / rect.width - 0.5,
+      y: (e.clientY - rect.top) / rect.height - 0.5
+    };
+    if (rafId === null) rafId = requestAnimationFrame(applyTilt);
   });
+
   tiltTarget.addEventListener("pointerleave", () => {
+    pending = null;
     visualCard.style.transform = "";
   });
 }
@@ -140,12 +191,42 @@ if (tiltTarget && visualCard && !window.matchMedia("(prefers-reduced-motion: red
 /* ---------- Demo order form ----------
    No fake success. Backend/API can be attached later.
 */
-$("#orderForm").addEventListener("submit", e => {
-  e.preventDefault();
-  const status = $("#formStatus");
-  status.textContent = "Demo rejim: forma tekshirildi. Backend ulanmagan, ma’lumotlar serverga yuborilmadi.";
-  playUiSound("click");
-});
+const orderForm = $("#orderForm");
+if (orderForm) {
+  orderForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const status = $("#formStatus");
+    if (status) {
+      status.textContent = "Demo rejim: forma tekshirildi. Backend ulanmagan, ma’lumotlar serverga yuborilmadi.";
+    }
+    playUiSound("click");
+  });
+}
+
+/* ---------- Scrollspy: highlight active nav link ---------- */
+const navLinks = $$(".desktop-nav a");
+const sectionMap = navLinks
+  .map(link => {
+    const id = link.getAttribute("href");
+    const section = id && id.startsWith("#") ? $(id) : null;
+    return section ? { link, section } : null;
+  })
+  .filter(Boolean);
+
+if (sectionMap.length) {
+  const spyObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const match = sectionMap.find(item => item.section === entry.target);
+        if (!match) return;
+        navLinks.forEach(l => l.classList.remove("active"));
+        match.link.classList.add("active");
+      }
+    });
+  }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+
+  sectionMap.forEach(item => spyObserver.observe(item.section));
+}
 
 /* ---------- Future integration notes ----------
    3D layer:
